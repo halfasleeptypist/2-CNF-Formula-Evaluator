@@ -1,0 +1,15 @@
+2cnfeval.spec
+build/2cnfeval/2cnfeval.pkg
+build/2cnfeval/Analysis-00.toc
+build/2cnfeval/base_library.zip
+build/2cnfeval/EXE-00.toc
+build/2cnfeval/localpycs/pyimod01_archive.pyc
+build/2cnfeval/localpycs/pyimod02_importers.pyc
+build/2cnfeval/localpycs/pyimod03_ctypes.pyc
+build/2cnfeval/localpycs/pyimod04_pywin32.pyc
+build/2cnfeval/localpycs/struct.pyc
+build/2cnfeval/PKG-00.toc
+build/2cnfeval/PYZ-00.pyz
+build/2cnfeval/PYZ-00.toc
+build/2cnfeval/warn-2cnfeval.txt
+build/2cnfeval/xref-2cnfeval.html
