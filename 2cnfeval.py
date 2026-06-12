@@ -11,13 +11,11 @@ import random # for randomize_formula method
 class InvalidFormulaError(Exception):
     def __init__(self, formula: str):
         print(f"Inputted {formula = } is invalid!")
-        # raise Exception("Inputted formula is invalid!")
 
 # Raised when one of the unsatisfiability conditions in the evaluation algorithm is met.
 class FormulaNotSatisfiableError(Exception):
     def __init__(self, result: str):
         print(f"Formula is not satisfiable! {result}")
-        # raise Exception("Formula is not satisfiable!")
 
 # Encapsulates the 2-CNF evaluator algorithm including private helper functions, and holds data variables for later access.
 class TwoCNFEvaluator:
@@ -71,7 +69,6 @@ class TwoCNFEvaluator:
         self.impl_graph = nx.DiGraph()
         self.result = ""
         node_attrs: dict[str, dict[str, str]] = {} # holds node attributes for later colouring and shaping in displayed graph
-        #edge_attrs: dict = {}
         
         # (1) Parse string input and check that it represents a valid formula in 2-CNF 
         # with any amount of quantified variables. If string input doesn't fit those patterns, raise error.
@@ -84,7 +81,6 @@ class TwoCNFEvaluator:
         
         # (2a) Store any quantified variables found in formula and create corresponding vertices in implication graph.
         f_quant: str = f[:f.index("(")] # is empty string if formula has no quantifiers
-        #print(f"{f_quant = }")
         if f_quant != "":
             f_quant_var: list[str] = [x for x in re.split(r'[\+\*]', f_quant) if x != ""] # returns list of variables
             f_quant_q: list[str] = [x for x in re.split(r'\w+', f_quant) if x != ""] # returns list of quantifiers
@@ -92,13 +88,10 @@ class TwoCNFEvaluator:
             self.impl_graph.add_nodes_from(list(self.variables.keys()) + [self.__compl(var) for var in self.variables.keys()])
             node_attrs |= {var: {"color": "tab:gray", "shape": "s"} if f_quant_q[i] == "*" else {"color": "tab:gray", "shape": "o"} for i, var in enumerate(f_quant_var)}
             node_attrs |= {self.__compl(var): {"color": "tab:gray", "shape": "s"} if f_quant_q[i] == "*" else {"color": "tab:gray", "shape": "o"} for i, var in enumerate(f_quant_var)}
-            #print(f"{f_quant_var = }, {f_quant_q = }")
-            #print(f"{self.variables = }")
     
         # (2b) Store any variables found in a clause of formula and create corresponding vertices and edges in implication graph.
         # If a variable has not been explicitly quantified before, assume it's existentially quantified and placed after all already quantified variables.
         f_cnf: str = f[f.index("("):]
-        #print(f"{f_cnf = }")
         clauses: list[str] = f_cnf.split("&")
         for clause in clauses:
             literals: list[str] = [x for x in re.split(r'[\(\|\)]', clause) if x != ""]
@@ -112,15 +105,7 @@ class TwoCNFEvaluator:
             v: str = literals[1]
             self.impl_graph.add_edge(self.__compl(u), v)
             self.impl_graph.add_edge(self.__compl(v), u)
-        #edge_attrs = {edge: {"color": "tab:gray"} for edge in self.impl_graph.edges()}
-        #print(f"{self.variables = }")
-
-        #print(f"{node_attrs = }")
-        #print(f"{edge_attrs = }")
         nx.set_node_attributes(self.impl_graph, node_attrs) # integrate node attributes into graph for later parsing and displaying
-        #nx.set_edge_attributes(self.impl_graph, edge_attrs)
-        #print(self.impl_graph.nodes.data())
-        #print(self.impl_graph.edges.data())
         
         # (3) Compute strongly connected components (strong comps) of the implication graph.
         # Its condensation H is also computed to determine if a strong comp is a successor or a predecessor of another.
@@ -202,7 +187,6 @@ class TwoCNFEvaluator:
             if step == 5:
                 for vert in verts_in_s: # check for only one vert
                     if node_to_strong_comp[self.__compl(vert)] != s: # if vert and compl(vert) are not in same strong comp
-                        comp_equals_dual = False
                         step = 6
                         break
                     else:
@@ -235,7 +219,6 @@ class TwoCNFEvaluator:
                     node_attrs |= {self.__compl(vert): {"color": "tab:green"} for vert in verts_in_s}
             
         nx.set_node_attributes(self.impl_graph, node_attrs) # integrate node attributes into graph for later parsing and displaying
-        #print(f"{node_attrs = }")
         
         # (5) Assign truth values to variables.
         # The corresponding variable to a vertex in a true or false strong comp gets assigned True or False, respectively.
@@ -285,7 +268,6 @@ class TwoCNFEvaluator:
 # Otherwise, display the unsatisfiability condition that was met during evaluation.
 def randomize():
     try:
-        #print(f"{str(root.winfo_width()) = }, {str(root.winfo_height()) = }")
         evaluator.randomize_formula()
         result.set(f"F is satisfiable for: {evaluator.result}!")
     except FormulaNotSatisfiableError:
@@ -321,7 +303,6 @@ def render_graph(G: nx.DiGraph):
     plt.clf() # clears graph view for a new graph to be inserted later
     pos = nx.forceatlas2_layout(G)
     pos = nx.kamada_kawai_layout(G, pos) # using one of these layouts on their own causes node overlaps, so apply both of them to create circular layout
-    #print(pos)
     for node, data in G.nodes.data():
         nx.draw_networkx_nodes(G, pos, nodelist=[node], node_shape=data["shape"], node_color=data["color"], node_size=300)
         for nbr in G.successors(node):
@@ -348,7 +329,7 @@ topleft = ttk.Label(content, text="F =", anchor="center")
 formula = StringVar()
 formula_input = ttk.Entry(content, textvariable=formula)
 enter = ttk.Button(content, text="Enter", command=press_enter)
-randomize = ttk.Button(content, text="Randomize formula", command=randomize)
+randomize_button = ttk.Button(content, text="Randomize formula", command=randomize)
 imgobj = ImageTk.PhotoImage(Image.open("start_placeholder.png"))
 graph_view = ttk.Label(content, image=imgobj)
 graph_view.image = imgobj
@@ -357,16 +338,12 @@ result_label = ttk.Entry(content, textvariable=result, state=["readonly"])
 s_result = ttk.Scrollbar(content, orient=HORIZONTAL, command=result_label.xview)
 result_label["xscrollcommand"] = s_result.set
 
-# root.bind('<Return>', lambda e: enter.invoke())
-
 # Arranges bits and pieces of GUI.
 content.grid(column=0, row=0, sticky="nwes")
 topleft.grid(column=0, row=0, sticky="nwes")
 formula_input.grid(column=1, row=0, sticky="nwes")
 enter.grid(column=2, row=0, sticky="nwes")
-randomize.grid(column=3, row=0, sticky="nwes")
-#frame.grid(column=0, row=1, columnspan=4, sticky="nwes")
-#graph_view.grid(column=0, row=0, sticky="nwes")
+randomize_button.grid(column=3, row=0, sticky="nwes")
 graph_view.grid(column=0, row=1, columnspan=4, sticky="nwes")
 result_label.grid(column=0, row=2, columnspan=4, sticky="nwes")
 s_result.grid(column=0, row=3, columnspan=4, sticky="nwes")
@@ -374,15 +351,8 @@ s_result.grid(column=0, row=3, columnspan=4, sticky="nwes")
 # Scales rows and columns appropriately and disables resizing.
 root.columnconfigure(0, weight=1)
 root.rowconfigure(0, weight=1)
-#content.columnconfigure(0, weight=1)
 content.columnconfigure(1, weight=1)
-#content.columnconfigure(2, weight=3)
-#content.columnconfigure(3, weight=3)
-#content.rowconfigure(0, weight=1)
 content.rowconfigure(1, weight=1)
-#content.rowconfigure(2, weight=1)
-#frame.columnconfigure(0, weight=1)
-#frame.rowconfigure(0, weight=1)
 root.resizable(False, False)
 
 # starts the program
